@@ -12,8 +12,12 @@
     </style>
         <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
     <meta content="utf-8" http-equiv="encoding">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
       <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.36.0/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.36.0/mapbox-gl.css' rel='stylesheet' />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
 
 </head>
@@ -21,13 +25,13 @@
 
 <style>
     .calculation-box {
-        height: 140px;
-        width: 150px;
+
         position: absolute;
         z-index:10000;
-        top: 210px;
-        left: 10px;
-        background-color: rgba(255, 255, 255, .9);
+        top: 160px;
+        right: 10px;
+
+        background-color: rgba(255, 255, 255, .5);
         padding: 15px;
         text-align: center;
     }
@@ -47,6 +51,19 @@
         margin: 10px 0;
     }
 
+        #corridor {
+        min-height: 20px;
+        background-color: #3887be;
+        color: #fff;
+        font-family: 'Open Sans';
+        border-radius: 5px;
+        padding: 10px;
+        cursor: pointer;
+        margin: 10px 0;
+    }
+
+
+
     p {
         font-family: 'Open Sans';
         margin: 0;
@@ -54,7 +71,7 @@
     }
 </style>
 
-<script src='https://api.tiles.mapbox.com/mapbox.js/plugins/turf/v3.0.11/turf.min.js'></script>
+<script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
 <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.17.4/mapbox-gl-draw.js'></script>
 <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.17.4/mapbox-gl-draw.css' type='text/css'/>
 
@@ -64,9 +81,13 @@
 <pre id='features'></pre>
 
 <div class='calculation-box'>
-    <p>Draw a polygon using the draw tools.</p>
+<a class="btn btn-primary" href="http://beta.dataspace.fr/citybeta">Retour City Dashboard</a>
+    <p>Draw a polygon using the draw tools above.</p>
+        <div id='corridor' class='button button'>Line to corridor</div>
+
     <div id='calculate' class='button button'>Calculate area</div>
     <div id='calculated-area'></div>
+
 </div>
 
 <script>
@@ -76,11 +97,11 @@
 mapboxgl.accessToken = 'pk.eyJ1IjoiZXRpYmR2IiwiYSI6ImNpejhvdWJmcjAwMW8yd28weTkzMnA1aDkifQ.i8UKq0M_sIN1qq8F6UAgFw';
 var mymap = new mapboxgl.Map({
     container: 'mapid',
-    style:"mapbox://styles/etibdv/cj0kv2vnc003a2rt8m01gpf4h",
-    center: [10.1591213,5.9630513],
-    zoom: 13
+    style:"mapbox://styles/etibdv/cj0cviykv00br2sqpvtoco9j8",
+    center: [-0.1969,5.55602],
+    zoom: 13,
+    hash: true,
 });
-
 
 /*
 mymap.on('load', function() {
@@ -99,19 +120,63 @@ mymap.on('load', function() {
 
 */
 // add leaflet.pm controls to the map
+
+
+mymap.addControl(new MapboxGeocoder({
+    accessToken: mapboxgl.accessToken
+}));
 var draw = new MapboxDraw({
     displayControlsDefault: false,
     controls: {
         polygon: true,
+        line_string:true,
         trash: true
     }
 });
 
 mymap.addControl(draw);
 
-mymap.addControl(new MapboxGeocoder({
-    accessToken: mapboxgl.accessToken
+mymap.addControl(new mapboxgl.ScaleControl({
+    maxWidth: 300,
 }));
+
+gjson = "";
+$.getJSON("Accra-road-center.geojson", function(data) {
+    gjson = data;
+});
+mymap.on('load',function()
+{
+   mymap.addSource('some id', {
+    type: 'geojson',
+    data: gjson,
+});
+
+mymap.addLayer({
+    "id":"route",
+    "type":"line",
+    "source":"some id",
+    "paint": {
+            "line-color": "#888",
+            "line-width": 10,
+            "line-opacity":0,
+        },
+}) 
+mymap.addSource("tom", {
+    "type": "geojson",
+    "data": {
+                "type": "FeatureCollection",
+                "features": []
+            }
+});
+    mymap.addLayer({
+    'id': 'foobar1',
+    'type': 'circle',
+    'source': 'tom',
+});
+
+});
+
+
 
 
 function GetSelection(layer){
@@ -127,8 +192,66 @@ var calcButton = document.getElementById('calculate');
 
 
 calcButton.onclick = function() {
+    /*
+    mymap.removeSource("tom");
+    mymap.removeLayer('foobar1');
+    */
     var data = draw.getAll();
+
+
+    arrayIntersection = [];
+
+
+    gjson.features.map(function(x){
+
+
+        var xpoints = turf.explode(x);
+
+        var ptsWithin = turf.within(xpoints, data);
+        var point1 = xpoints.features[0];
+        var point2 = xpoints.features[xpoints.features.length-1]; 
+
+
+
+
+
+        if (ptsWithin.features.length == xpoints.features.length){
+            arrayIntersection.push(x)
+
+        } else if ((ptsWithin.features.length < xpoints.features.length) && (ptsWithin.features.length > 0) ){
+            var temp = turf.featureCollection([point1,point2]);
+            var get = turf.within(temp,data);
+            var points = turf.lineIntersect(x,data.features[0]);
+            var result = []
+            points.features.map(function(x){result.push(x)});
+            get.features.map(function(x){result.push(x)});
+            result = turf.featureCollection(result);
+            var sliced = turf.lineSlice(result.features[0], result.features[1], x);
+            arrayIntersection.push(sliced)
+
+
+        }
+
+/*
+
+
+
+        if (temp.features.length >0 ){
+            temp.features.map(function(x){arrayIntersection.push(x)});
+
+        }
+        */
+
+    });
+
+    var size_road = 0;
+
+    arrayIntersection.map(function(x){size_road += turf.lineDistance(x,'kilometers')})
+
+
+    JSONIntersection = turf.featureCollection(arrayIntersection);
     var bbox = turf.bbox(data);
+    var bounds = mymap.getBounds();
     var n = 500;
     var dist = Math.sqrt(((bbox[2]-bbox[0])*(bbox[3]-bbox[1]))/n);
 
@@ -151,15 +274,16 @@ calcButton.onclick = function() {
   /*
     mymap.addSource("tom", {
     "type": "geojson",
-    "data": isInside
+    "data": JSONIntersection
 });
     mymap.addLayer({
     'id': 'foobar1',
     'type': 'circle',
     'source': 'tom',
 });
-    mymap.fitBounds([[bbox[0],bbox[1]],[bbox[2],bbox[3]]]);
-    */
+*/
+    //mymap.fitBounds([[bbox[0],bbox[1]],[bbox[2],bbox[3]]]);
+    
   
     
 
@@ -167,14 +291,103 @@ calcButton.onclick = function() {
         var area = turf.area(data);
         // restrict to area to 2 decimal points
         var rounded_area = Math.round(area*100)/100000000;
+        var rounded_kil = Math.round(size_road*100)/100;
+        var hab = ((density*rounded_area*100)/isInside.features.length);
+        var kilhab = Math.round(hab/rounded_kil) ;
         var answer = document.getElementById('calculated-area');
-        answer.innerHTML = '<p><strong>' + rounded_area + '</strong></p><p>km2</p><br><p><strong>' + ((density*rounded_area*100)/isInside.features.length)+'</strong></p><p>habitants</p>';
+        answer.innerHTML = '<p><strong>' + rounded_area + '</strong></p><p>km2</p>'+'<br><p><strong>' +hab +'</strong></p><p>habitants</p>'+'<br><p><strong>' +rounded_kil +'</strong></p><p>kilomètre voirie 1er</p>'+'<br><p><strong>' +kilhab +'</strong></p><p>habitants par kilomètre</p>';
     } else {
         alert("Use the draw tools to draw a polygon!");
     }
     };
 
+var corridorButton = document.getElementById('corridor');
 
+corridorButton.onclick = function(){
+    var data = draw.getAll();
+    var buff = []
+    data.features[0].geometry.coordinates.map(function(x){buff.push(x)})
+    temp= turf.circle(buff[0], 0.5, 10, 'kilometers')
+    for (var i = 0; i < buff.length-1; i++){
+
+        var retour = line2rect(buff[i],buff[i+1],0.5)
+
+        a = turf.convex(turf.featureCollection(retour))
+        b = turf.circle(buff[i], 0.5, 10, 'kilometers')
+        c = turf.circle(buff[i+1], 0.5, 10, 'kilometers')
+        temp = turf.union(temp, a ,b, c)
+    }
+
+    draw.deleteAll()
+    draw.add(temp)
+/*
+    JSONIntersection = temp;
+        mymap.addSource("olive", {
+    "type": "geojson",
+    "data": JSONIntersection
+});
+    mymap.addLayer({
+    'id': 'foobar1',
+    'type': 'fill',
+    'source': 'olive',
+     "paint": {
+
+            "fill-opacity":0.5,
+        },
+});
+*/
+
+
+}
+
+
+function rotatePoints(center, points, yaw, r) {
+  var res = []
+  var angle = yaw * (Math.PI / 180) 
+
+  for(var i=0; i<points.length; i++) {
+    var p = points[i]
+    // translate to center
+    var p2 = [ p[0]-center[0], p[1]-center[1] ]
+    // rotate using matrix rotation
+    var p3 = [ Math.cos(angle)*p2[0] - Math.sin(angle)*p2[1], Math.sin(angle)*p2[0] + Math.cos(angle)*p2[1]]
+    // translate back to cente
+ 
+    t= turf.distanceToDegrees(r)
+       
+    var d = Math.sqrt(Math.pow( p3[0], 2) + Math.pow( p3[1], 2))
+
+    var alpha = t/d
+    
+
+    var p4 = [ alpha*p3[0]+center[0], alpha* p3[1]+center[1]]
+    // done with that point
+    res.push(p4)
+  }
+  return res
+}
+
+function line2rect(point1, point2, r){
+    res = []
+
+    res.push(rotatePoints(point1, [point2], 90, r))
+    res.push(rotatePoints(point1, [point2], -90, r))
+
+    var u = point2[0]-point1[0]
+    var v = point2[1]-point1[1]
+
+
+    var tur = res.map(function(x){return turf.point(x[0])});
+    res.map(function(x){tur.push(turf.point([x[0][0]+u,x[0][1]+v]))})
+
+
+
+
+
+    return tur
+
+
+}
 
 </script>
 

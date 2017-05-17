@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+
+
+    <!-- Mithril -->
+
+    <script src="//unpkg.com/mithril/mithril.js"></script>
+
+    <!-- Mapbox et Add-on -->
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.36.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.36.0/mapbox-gl.css' rel='stylesheet' />
+
+    <script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
+    <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.17.4/mapbox-gl-draw.js'></script>
+    <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.17.4/mapbox-gl-draw.css' type='text/css'/>
+
+
+    <!-- jQuery-->
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+
+
+    <!-- Bootstrap FontAwesome-->
+
+    <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css">
+
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Open+Sans" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
+
+
+    <!-- Personnalisé -->
+    <link rel="stylesheet" href="css/style.css" type="text/css" />
+    <link rel="stylesheet" href="css/menu.css" type="text/css" />
+    <link rel="stylesheet" href="css/common.css" type="text/css" />
+
+    <style>
+    .calculation-box {
+
+        position: absolute;
+        z-index:10000;
+        top: 130px;
+        right: 10px;
+
+        background-color: rgba(255, 255, 255, .5);
+        padding: 15px;
+        text-align: center;
+    }
+    .features{
+      position: absolute;
+      z-index:10001;
+    }
+
+    #calculate {
+        min-height: 20px;
+        background-color: #3887be;
+        color: #fff;
+        font-family: 'Open Sans';
+        border-radius: 5px;
+        padding: 10px;
+        cursor: pointer;
+        margin: 10px 0;
+    }
+
+
+
+    p {
+        font-family: 'Open Sans';
+        margin: 0;
+        font-size: 13px;
+    }
+    </style>
+
+
+  
+
+</head>
+
+<body>
+
+    <div id="afdmenu" class="menu"></div>
+    <div id="cityinfo">
+        <div id="selectcities"></div>
+        <div id="wikintro"></div>
+    </div>
+    <div id="mapid"></div>
+    <script src="js/main.js"></script>
+
+
+
+
+
+</body>
+
+</html>

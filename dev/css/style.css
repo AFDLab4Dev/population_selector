@@ -1,0 +1,42 @@
+	html,
+	body {
+
+		height: 100%;
+		margin-left: 0;
+		margin-right: 0;
+		margin-top: 0;
+	}
+
+	#leafletmap {
+		height: 100%;
+		z-index:0;
+
+	}
+
+	#mapid {
+		height: 100%;
+	}
+
+	#cityinfo {
+		position: absolute;
+		right: 50px;
+		top: 100px;
+		z-index:10000;
+		width:330px;
+		background-color: white;
+	}
+
+	#afdmenu{
+		position: absolute;
+		z-index:10002;
+	}
+
+	.leaflet-control-layers-toggle {
+    background-image: url(img/control.png);
+}
+
+	.leaflet-touch .leaflet-control-layers-toggle {
+    width:36px;
+    height:36px;
+}
+
